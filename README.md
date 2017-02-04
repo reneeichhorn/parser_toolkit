@@ -1,6 +1,13 @@
 # Parser Toolkit
 A parser toolkit written in node that simplifies parsing of custom formats
 
+- [Parser Toolkit](#parser-toolkit)
+  * [Motivation](#motivation)
+  * [Features](#features)
+  * [Example](#example)
+  * [Documentation](#documentation)
+  * [ToDo](#todo)
+
 ## Motivation
 Parsing of custom syntax forms that you created is usually not so easy and is a mess.
 Parser Toolkit simplyifies the parsing process by allowing you to define keywords, tokens and grammar rules.
