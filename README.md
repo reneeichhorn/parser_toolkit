@@ -1,6 +1,7 @@
 # Parser Toolkit
 A parser toolkit written in node that simplifies parsing of custom formats
 
+# ToC
 - [Parser Toolkit](#parser-toolkit)
   * [Motivation](#motivation)
   * [Features](#features)
