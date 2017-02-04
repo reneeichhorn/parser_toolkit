@@ -14,6 +14,8 @@ const tokens = [];
 const plugins = {};
 const holders = {};
 
+const e = new EventEmitter();
+
 class Library extends EventEmitter {
   /*loadFromString(s) {
     const s = new stream.Readable();
@@ -24,7 +26,11 @@ class Library extends EventEmitter {
   }*/
 
   logDebug(msg) {
-    this.emit('logDebug', msg);
+    e.emit('logDebug', msg);
+  }
+
+  on(ev, cb) {
+    e.on(ev, cb);
   }
 
   tokenize(code) {
