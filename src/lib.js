@@ -15,13 +15,13 @@ const plugins = {};
 const holders = {};
 
 class Library extends EventEmitter {
-  loadFromString(s) {
+  /*loadFromString(s) {
     const s = new stream.Readable();
     s._read = function noop() {}; // redundant? see update below
     s.push(s);
     s.push(null);
     return s;
-  }
+  }*/
 
   logDebug(msg) {
     this.emit('logDebug', msg);
