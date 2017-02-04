@@ -136,7 +136,14 @@ Plugin.createGrammar({
     });
   }
 });
+```
 
+Now lets parse our test file:
+```js
+parserToolkit.parse('...')[0].get('floating_point');
+// note that index 0 is our root element.
+// well actually we could have multiple "Option { .. } " blocks with 
+//  our current defintion :)
 ```
 
 ## Documentation
