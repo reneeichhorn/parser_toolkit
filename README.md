@@ -10,9 +10,9 @@ Parser Toolkit simplyifies the parsing process by allowing you to define keyword
 - Tokens defined by a keyword
 - Tokens defined by a special character
 - Gramamatical rules that allows to parse even very complex languages for instance
--- Human readable grammatic definition
--- Optionals
--- Lists with optionals seperator
+  * Human readable grammatic definition
+  * Optionals
+  * Lists with optionals seperator
 
 
 ## Example
@@ -79,7 +79,7 @@ const STRING = Plugin.createToken({
 }).get();
 ```
 The last thing todo is to finally define the grammatic rules.
-```
+```js
 // this is how our object should look like in the end
 class Options {
   constructor(options) {
