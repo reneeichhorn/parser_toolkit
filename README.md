@@ -152,12 +152,19 @@ parserToolkit.parse('...')[0].get('floating_point');
 ## Documentation
 `parserToolkit.parse(code)`
 Parses the given code and returns an object tree
+
+
 `parserToolkit.compile(code)`
 Parses & recursively compiles the given code
+
+
 `parserToolkit.tokenize(code)`
 Only tokenizes the input and returns an array of parsed tokens.
+
+
 `parserToolkit.onDebugLog((msg) => console.log(msg));`
 Adds a callback for debug logs
+
 
 `parserToolkit.onErrorLog((msg) => console.log(msg));`
 Adds a callback for error logs
