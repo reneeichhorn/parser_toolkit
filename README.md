@@ -17,40 +17,54 @@ Parser Toolkit simplyifies the parsing process by allowing you to define keyword
 
 ## Example
 Imagine you have following file that you want to parse.
-```
-integer = 1
-floating_point = 0.5
-string = 'abc'
+```js
+Options {
+  integer = 1
+  floating_point = 0.5
+  string = 'abc'
+}
 ```
 Our dummy grammar defintion is:
 ```
 IDENTIFIER EQUALS INTEGER|FLOAT|STRING
 ```
 First thing to do is to create a new plugin that extends the parser
-```
+```js
 const Plugin = parserToolkit.createPlugin({
   name: 'ConfigPlugin',
 });
 parserToolkit.registerPlugin(Plugin);
 ```
 Next up is the defintion our used tokens
-```
+```js
 const IDENTIFIER = Plugin.createToken({
   name: 'identifier',
   expression: /^[a-zA-Z_]+[a-zA-Z_0-9]*$/,
-});
+}).get();
 const EQUALS = Plugin.createToken({
   name: 'equals',
   expression: '=',
-});
+}).get();
+const OPT = Plugin.createToken({
+  name: 'options',
+  expression: 'Options',
+}).get();
+const BO = Plugin.createToken({
+  name: 'options',
+  expression: 'Options',
+}).get();
+const BE = Plugin.createToken({
+  name: 'options',
+  expression: 'Options',
+}).get();
 const INT = Plugin.createToken({
   name: 'integer',
   expression: /^[0-9]+$/,
-});
+}).get();
 const FLOAT = Plugin.createToken({
   name: 'float',
   expression: /^[0-9]+\.[0-9]*$/,
-});
+}).get();
 const STRING = Plugin.createToken({
   name: 'string',
   expression: /^'.*'$/,
@@ -62,9 +76,68 @@ const STRING = Plugin.createToken({
         .replace('\\n', '\n')
         .replace('\\t', '\t');
   },
-});
+}).get();
 ```
+The last thing todo is to finally define the grammatic rules.
+```
+// this is how our object should look like in the end
+class Options {
+  constructor(options) {
+    this.options = {};
+    
+    options.options.forEach(option => {
+      this.options[option.key] = option.value;
+    });
+  }
+  
+  get(key) {
+    return this.options[key];
+  }
+}
+Plugin.createObject('Options', Options);
 
+// a holder is basically a list with an filter
+// this holder can 'hold' anything
+const CONTENT = Plugin.createHolder({
+  name: 'OptionHolder',
+  filter: () => true,
+}).get();
+
+// grammar for entries
+Plugin.createGrammar({
+  name: 'FloatOption',
+  grammar: `${IDENTIFIER}:key ${EQUALS} ${FLOAT}:value`,
+  parsed(tokens) { 
+    return { key: tokens.key, value: tokens:value }
+  }
+});
+Plugin.createGrammar({
+  name: 'IntOption',
+  grammar: `${IDENTIFIER}:key ${EQUALS} ${INT}:value`,
+  parsed(tokens) { 
+    return { key: tokens.key, value: tokens:value }
+  }
+});
+Plugin.createGrammar({
+  name: 'StringOption',
+  grammar: `${IDENTIFIER}:key ${EQUALS} ${STRING}:value`,
+  parsed(tokens) { 
+    return { key: tokens.key, value: tokens:value }
+  }
+});
+
+// grammar for root element
+Plugin.createGrammar({
+  name: 'OptionsGrammar',
+  grammar: `${OPT} ${BO} ${CONTENT} ${BC}`,
+  parsed(tokens, children) {
+    return Plugin.instantiateObject('Options', {
+      options: children[0].parse(),
+    });
+  }
+});
+
+```
 
 ## Documentation
 `parserToolkit.onDebugLog((msg) => console.log(msg));`
