@@ -16,7 +16,7 @@ const holders = {};
 
 const e = new EventEmitter();
 
-class Library extends EventEmitter {
+class Library {
   /*loadFromString(s) {
     const s = new stream.Readable();
     s._read = function noop() {}; // redundant? see update below
@@ -37,7 +37,7 @@ class Library extends EventEmitter {
     let input = code;
     tokenizer.find_reserved();
 
-    this.debugLog('\ntokenizing! waiting..\n');
+    this.logDebug('\ntokenizing! waiting..\n');
 
     let programTokens = tokenizer.tokenize(input);
     let filtered = programTokens.filter(token => {
