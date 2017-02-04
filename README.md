@@ -6,13 +6,16 @@ Parsing of custom syntax forms that you created is usually not so easy and is a 
 Parser Toolkit simplyifies the parsing process by allowing you to define keywords, tokens and grammar rules.
 
 ## Features
-- Tokens defined by a regex
-- Tokens defined by a keyword
-- Tokens defined by a special character
+- Advanced tokenizer
+  * Tokens defined by a regex
+  * Tokens defined by a keyword
+  * Tokens defined by a special character
 - Gramamatical rules that allows to parse even very complex languages for instance
   * Human readable grammatic definition
   * Optionals
   * Lists with optionals seperator
+- Compiler / Transpiler
+  * Recursively compiles all objects
 
 
 ## Example
