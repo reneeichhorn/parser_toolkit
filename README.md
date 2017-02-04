@@ -175,6 +175,7 @@ Adds a callback for error logs
 
 
 ## ToDo
+- Unit tests!!!!
 - Refactoring & beauty up the code
 - More beautiful definition
 - Fix namespacing
