@@ -150,6 +150,12 @@ parserToolkit.parse('...')[0].get('floating_point');
 ```
 
 ## Documentation
+`parserToolkit.parse(code)`
+Parses the given code and returns an object tree
+`parserToolkit.compile(code)`
+Parses & recursively compiles the given code
+`parserToolkit.tokenize(code)`
+Only tokenizes the input and returns an array of parsed tokens.
 `parserToolkit.onDebugLog((msg) => console.log(msg));`
 Adds a callback for debug logs
 
@@ -165,3 +171,4 @@ Adds a callback for error logs
 - Refactoring & beauty up the code
 - More beautiful definition
 - Fix namespacing
+- Custom root level parent
