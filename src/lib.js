@@ -66,7 +66,6 @@ class Library {
   compile(code) {
     const objtree = this.parse(code);
     this.logDebug('translating code! waiting..\n');
-    this.logDebug = debug;
     let transpiledCode = compiler.compile(objectTree);
     return transpiledCode;
   } 
