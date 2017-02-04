@@ -44,7 +44,7 @@ class Library {
       return !(token.name == 'Newline' || token.name == 'Whitespace' || token.name == 'Tab');
     });
 
-    this.debugLog(JSON.stringify(filtered, null, 2));
+    this.logDebug(JSON.stringify(filtered, null, 2));
 
     return filtered;
   }
