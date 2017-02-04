@@ -1,5 +1,9 @@
 # Parser Toolkit
 A parser toolkit written in node that simplifies parsing of custom formats
+```js
+npm i --save auruss/parser_toolkit
+const parserToolkit = require('parser-toolkit');
+```
 
 # ToC
 - [Parser Toolkit](#parser-toolkit)
