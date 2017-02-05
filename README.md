@@ -29,6 +29,10 @@ Parser Toolkit simplyifies the parsing process by allowing you to define keyword
 - Compiler / Transpiler
   * Recursively compiles all objects
 
+# How complex can it get?
+As complex as you like. C++ is considered to be a hard language for parsers.
+I accepted this challenge and created a full c++ parser using Parser Toolkit.
+See https://github.com/Auruss/extended-cpp
 
 ## Example
 Imagine you have following file that you want to parse.
