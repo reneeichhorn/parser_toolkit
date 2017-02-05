@@ -8,6 +8,26 @@ module.exports = (grammar) => {
   let wrappers = [];
   let wrapper_state = null;
 
+  tokens.push({
+    name: 'Whitespace',
+    expression: /^ +$/,
+  });
+
+  tokens.push({
+    name: 'Newline',
+    expression: /^\n$/,
+  });
+
+  tokens.push({
+    name: 'NewlineR',
+    expression: /^\r$/,
+  });
+
+  tokens.push({
+    name: 'Tab',
+    expression: /^\t$/,
+  });
+
   return {
     add_token(options) {
       tokens.push(options);
@@ -40,7 +60,7 @@ module.exports = (grammar) => {
 
       tokens = tokens.filter(token => remove.indexOf(token.name) == -1);
 
-      console.log(JSON.stringify(tokens, null, 2));
+      //console.log(JSON.stringify(tokens, null, 2));
     },
 
     findNextToken(text, position, token) {
@@ -156,21 +176,6 @@ module.exports = (grammar) => {
         possible: wrappers,
       };
 
-      tokens.push({
-        name: 'Whitespace',
-        expression: /^ +$/,
-      });
-
-      tokens.push({
-        name: 'Newline',
-        expression: /^\n$/,
-      });
-
-      tokens.push({
-        name: 'Tab',
-        expression: /^\t$/,
-      });
-
       let foundTokens = [];
       let possible = tokens;
 
@@ -238,7 +243,7 @@ module.exports = (grammar) => {
             this.checkWrapper(text, index, clone, foundTokens);
             if (!wrapper_state.wrapper_mode) {
               foundTokens.push(clone);
-              console.log(clone);
+              //console.log(clone);
             }
 
             start = index - 1;

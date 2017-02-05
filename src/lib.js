@@ -41,7 +41,10 @@ class Library {
 
     let programTokens = tokenizer.tokenize(input);
     let filtered = programTokens.filter(token => {
-      return !(token.name == 'Newline' || token.name == 'Whitespace' || token.name == 'Tab');
+      return !(token.name == 'Newline' ||
+         token.name == 'Whitespace' ||
+         token.name == 'Tab' ||
+         token.name == 'NewlineR' );
     });
 
     this.logDebug(JSON.stringify(filtered, null, 2));
@@ -51,6 +54,7 @@ class Library {
 
   parse(code) {
     const filtered = this.tokenize(code);
+    console.log(filtered);
 
     this.logDebug('generating ast! waiting..\n');
     let builder = grammarReg.createTokenBuilder(filtered, holders);
@@ -60,23 +64,28 @@ class Library {
     this.logDebug('generate object tree! waiting..\n');
     let objectTree = compiler.parse(filtered, ruleTree, grammars);
     this.logDebug(JSON.stringify(objectTree, null, 2));
+
     return objectTree;
   }
 
   compile(code) {
     const objtree = this.parse(code);
+
     this.logDebug('translating code! waiting..\n');
+
     let transpiledCode = compiler.compile(objtree);
     return transpiledCode;
   } 
 
   createPlugin(options) {
+    const self = this;
     this.logDebug(`Plugin '${options.name}' registered`);
 
     const thisObjects = {};
     const thisGrammars = {};
     const thisHolders = {};
     const thisTokens = {};
+    const thisWrappers = {};
 
     return {
       instantiateObject(name, options) {
@@ -91,7 +100,7 @@ class Library {
       },
 
       createGrammar(options) {
-        this.logDebug(`\tGrammar '${options.name}' registered`);
+        self.logDebug(`\tGrammar '${options.name}' registered`);
         grammars[options.name] = options;
 
         const grammar = {
@@ -108,7 +117,7 @@ class Library {
       },
 
       createHolder(options) {
-        this.logDebug(`\tHolder '${options.name}' registered`);
+        self.logDebug(`\tHolder '${options.name}' registered`);
 
         let obj = {
           get() {
@@ -128,7 +137,7 @@ class Library {
       },
 
       createWrapper(options) {
-        this.logDebug(`\tWrapper '${options.name}' registered`);
+        self.logDebug(`\tWrapper '${options.name}' registered`);
         
         thisWrappers[options.name] = options;
         grammarReg.registerWrapper(options);
@@ -136,7 +145,7 @@ class Library {
       },
 
       createToken(options) {
-        this.logDebug(`\tToken '${options.name}' registered for '${options.expression}'`);
+        self.logDebug(`\tToken '${options.name}' registered for '${options.expression}'`);
 
         let alreadyExists = false;
         let existing = {};
