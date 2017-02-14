@@ -117,6 +117,9 @@ module.exports = () => {
           return this.findFittingAll(0, treeArr);
         },
 
+        /**
+         * Searches for grammars til token end or as soon as grammars are no longer applying
+         **/
         findFittingAll(tokenIndex, grammars) {
           const result = {
             name: 'program',
@@ -135,6 +138,9 @@ module.exports = () => {
           return result;
         },
 
+        /**
+         * Looks for the best fitting grammar
+         */
         findFitting(tokenIndex, grammars) {
           const result = {
             start: tokenIndex,
