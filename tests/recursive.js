@@ -5,103 +5,127 @@ const assert = chai.assert;
 
 suite('Recursive Test Suite', () => {
     const parser = new ParserToolkit();
+    const plugin = parser.createPlugin({
+        name: 'TestCaseRecurisve',
+    });
 
-    setup(() => {
-        // build example grammar
-        const TOKEN1 = parser.addToken({
-            name: 'token1',
-            expression: 'token1',
+    suiteSetup(() => {
+        // create some test tokens
+        const IF = plugin.createToken({
+            name: 'if',
+            expression: 'if',
         }).get();
 
-        const TOKEN2 = parser.addToken({
-            name: 'token2',
-            expression: 'token2',
+        const PO = plugin.createToken({
+            name: 'po',
+            expression: '(',
         }).get();
 
-        const TOKEN3 = parser.addToken({
-            name: 'token3',
-            expression: 'token3',
+        const PE = plugin.createToken({
+            name: 'pe',
+            expression: ')',
         }).get();
 
-        const TOKEN4 = parser.addToken({
-            name: 'token4',
-            expression: 'token4',
+        const EQ = plugin.createToken({
+            name: 'eq',
+            expression: '==',
         }).get();
 
-        parser.addGrammar({
-            name: 'circular_child1',
-            grammar: `${TOKEN1}`,
-            parsed() { return { checker: 'circular_child1' }; }
-        });
+        const AND = plugin.createToken({
+            name: 'and',
+            expression: '&&',
+        }).get();
 
-        parser.addGrammar({
-            name: 'circular_child2',
-            grammar: `${TOKEN3}`,
-            parsed() { return { checker: 'circular_child2' }; }
-        });
+        const IDENT = plugin.createToken({
+            name: 'ident',
+            expression: /^[a-zA-Z]*$/,
+        }).get();
 
-        const CIRCULAR_HOLDER = parser.addHolder({
-            name: 'circular_holder',
-            filter(f) {
-                return true;
-            },
-        });
+        // expression holder
+        const EXPR = plugin.createHolder({
+            name: 'expr',
+            filter(t) {
+                return (t.name === 'eq' ||
+                    t.name === 'and' ||
+                    t.name === 'ident');
+            }
+        }).get();
 
-        parser.addGrammar({
-            name: 'circular_root1',
-            grammar: `${CIRCULAR_HOLDER} ${TOKEN2} ${CIRCULAR_HOLDER}`,
+        // create base grammars
+        plugin.createGrammar({
+            root: false,
+            name: 'eq',
+            grammar: `${EXPR} ${EQ} ${EXPR}`,
             parsed(tokens, children) {
                 return {
-                    checker: 'circular_root1',
-                    children: [
-                        children[0].parse(),
-                        children[1].parse(),
-                    ],
+                    name: 'eq',
+                    left: children[0].parse()[0],
+                    right: children[1].parse()[0],
                 };
             }
         });
 
-        parser.addGrammar({
-            name: 'circular_root2',
-            grammar: `${CIRCULAR_HOLDER} ${TOKEN4} ${CIRCULAR_HOLDER}`,
+        plugin.createGrammar({
+            root: false,
+            name: 'and',
+            grammar: `${EXPR} ${AND} ${EXPR}`,
             parsed(tokens, children) {
                 return {
-                    checker: 'circular_root2',
-                    children: [
-                        children[0].parse(),
-                        children[1].parse(),
-                    ],
+                    name: 'and',
+                    left: children[0].parse()[0],
+                    right: children[1].parse()[0],
+                };
+            }
+        });
+
+        plugin.createGrammar({
+            root: false,
+            name: 'ident',
+            grammar: `${IDENT}:val`,
+            parsed(tokens, children) {
+                return {
+                    name: 'ident',
+                    value: tokens.val.value,
+                };
+            }
+        });
+
+        plugin.createGrammar({
+            name: 'if',
+            grammar: `${IF} ${PO} ${EXPR} ${PE}`,
+            parsed(tokens, children) {
+                return {
+                    name: 'if',
+                    expr: children[0].parse()[0],
                 };
             }
         });
     });
 
-    test('should test non-recursive #1', () => {
-        const input = 'token1 token2 token3';
-        const expected = {
-            checker: 'circular_root1',
-            children: [
-                { checker: 'circular_child1' },
-                { checker: 'circular_child2' },
-            ],
-        };
+    const expected = [
+        ['if (abc)', { name: 'if', expr: { name: 'ident', value: 'abc' } }],
+        ['if (a == b)', {
+            name: 'if',
+            expr: {
+                name: 'eq',
+                left: { name: 'ident', value: 'a' },
+                right: { name: 'ident', value: 'b'},
+            }
+        }],
+        ['if (a && b)', {
+            name: 'if',
+            expr: {
+                name: 'and',
+                left: { name: 'ident', value: 'a' },
+                right: { name: 'ident', value: 'b'},
+            }
+        }],
+    ];
 
-        assert.deepEqual(parser.parse(), expected);
+    expected.forEach(ex => {
+        test(`should parse: '${ex[0]}'`, () => {
+            assert.deepEqual(parser.parse('\n\n' + ex[0] + '\n\n'), ex[1]);
+        });
     });
 
-    test('should test non-recursive #2', () => {
-        const input = 'token1 token4 token3';
-        const expected = {
-            checker: 'circular_root2',
-            children: [
-                { checker: 'circular_child1' },
-                { checker: 'circular_child2' },
-            ],
-        };
-
-        assert.deepEqual(parser.parse(), expected);
-    });
-
-    test('should test n-levels of recursions', () => {
-    });
 });
