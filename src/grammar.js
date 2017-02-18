@@ -1,8 +1,10 @@
 'use strict';
 
 const parser = require('./grammar_parser');
-const chalk = require('chalk');
+const TokenStateHandler = require('./token_state');
+const ParserLogger = require('./parser_logger');
 
+// @TODO REFACTOR: console.log everywhere...
 module.exports = () => {
 
   const tree = {
@@ -29,6 +31,7 @@ module.exports = () => {
     }
 
     let exist = null;
+    // @TODO REFACTOR: supposed to be an assign isn't it???!!
     exist == typeof destination[tokens[0]] !== 'undefined';
 
     if (exist !== null) {
@@ -111,21 +114,28 @@ module.exports = () => {
       console.log(JSON.stringify(registryArr, null, 2));
     },
     createTokenBuilder(tokens, holders) {
-      return {
+      const tokenStateManager = new TokenStateHandler();
+      const logger = new ParserLogger();
 
+      return {
         build() {
           return this.findFittingAll(0, treeArr);
+        },
+
+        getLog() {
+          return logger.toString();
         },
 
         /**
          * Searches for grammars til token end or as soon as grammars are no longer applying
          **/
-        findFittingAll(tokenIndex, grammars) {
+        findFittingAll(tokenIndex, grammars, max = 0) {
           const result = {
             name: 'program',
             children: [],
           };
 
+          let n = 0;
           while (true) {
             let child = this.findFitting(tokenIndex, grammars);
 
@@ -133,6 +143,9 @@ module.exports = () => {
 
             result.children.push(child);
             tokenIndex = child.end;
+            n++;
+
+            if (max != 0 && n == max) break;
           }
 
           return result;
@@ -148,9 +161,27 @@ module.exports = () => {
           };
 
           grammars.map(grammar => {
+            // if grammar is not good / therefore blocked or in processing we don't need to check it at this point.
+            if (!tokenStateManager.getState(result.start, grammar.name).isGood()) {
+              // recheck again for more detailed logging
+              if (tokenStateManager.getState(result.start, grammar.name).isProcessing()) {
+                logger.writeLine(`ignoring ${grammar.name} at ${result.start}: cause state is processing..`);
+              } else {
+                logger.writeLine(`ignoring ${grammar.name} at ${result.start}: cause state is blocked..`);
+              }
+              return;
+            }
+
+            // @TODO REFACTOR:
+            // when result.end is not undefined it means the grammar was found already
+            // why is a completed grammar passed here though?
+            // The loop should just break in that case. Investigation needed..
             if (typeof result.end !== 'undefined') return;
 
-            console.log(chalk.red('start checking', grammar.name));
+            // grammar is now being processed, no need to recheck it again on a higher level
+            tokenStateManager.getState(result.start, grammar.name).setProcessing();
+            logger.writeLine(`${grammar.name} at ${result.start}: now processing..`);
+            logger.writeLine('start checking ' + grammar.name);
 
             let grammarTokenPointer = 0;
             let tokenPointer = tokenIndex;
@@ -173,7 +204,7 @@ module.exports = () => {
                 break;
               }
 
-              console.log(tokenPointer, tokens[tokenPointer].name, grammar.tokens[grammarTokenPointer].replace(/:[a-zA-Z]+/, ''));
+              logger.writeLine(`${tokenPointer} '${tokens[tokenPointer].name}' '${grammar.tokens[grammarTokenPointer].replace(/:[a-zA-Z]+/, '')}'`);
 
               if (grammar.tokens[grammarTokenPointer] == '-SELF-') {
                 let name = grammar.name.replace(/#[0-9]+/, '');
@@ -186,11 +217,13 @@ module.exports = () => {
                   tokens[tokenPointer].alias = regex.exec(grammar.tokens[grammarTokenPointer])[0].substr(1);
                 }
               } else if (grammar.tokens[grammarTokenPointer].startsWith('-G')) {
-                console.log('go deeper');
+                //console.log('go deeper');
+                logger.nextLevel();
                 let grammarName = grammar.tokens[grammarTokenPointer].substr(2, grammar.tokens[grammarTokenPointer].length - 3);
                 let found = this.findFitting(tokenPointer,
                   registryArr.filter(g => g.name.startsWith(grammarName)));
-                console.log('go higher');
+                //console.log('go higher');
+                logger.previousLevel();
 
                 if (typeof found.end !== 'undefined') {
                   tokenPointer = found.end - 1;
@@ -200,11 +233,22 @@ module.exports = () => {
                   cause = 'sub gramma not found, ' + JSON.stringify(found);
                 }
               } else if (grammar.tokens[grammarTokenPointer].startsWith('-H')) {
+                // parse out -H to get actual holder name
                 let realname = grammar.tokens[grammarTokenPointer].substr(2, grammar.tokens[grammarTokenPointer].length - 3);
+
+                // ask holder for a list of available grammars
                 let targetGrammars = treeArr.concat(registryArr).filter(holders[realname].filter);
-                console.log('go deeper (holder)');
-                let found = this.findFittingAll(tokenPointer, targetGrammars);
-                console.log('go higher (holder)');
+
+                //logger.writeLine('go deeper (holder)');
+                logger.nextLevel();
+
+                let found = this.findFittingAll(
+                    tokenPointer,
+                    targetGrammars,
+                    typeof holders[realname].maxElements !== 'undefined' ? holders[realname].maxElements : 0);
+
+                logger.previousLevel();
+                //logger.writeLine('go higher (holder)');
 
                 if (found.children.length > 0) {
                   found.name = 'holder';
@@ -230,11 +274,21 @@ module.exports = () => {
             }
 
             if (isCorrect) {
+              // reset state -> grammar is once again fine
+              tokenStateManager.getState(result.start, grammar.name).reset();
+              logger.writeLine(`${grammar.name} at ${result.start}: now good again..`);
+
               result.end = tokenPointer;
               result.name = grammar.name;
             } else {
               result.children.pop();
-              console.log(chalk.red('was incorrect', grammar.name, 'cause: ', cause));
+
+              // mark this grammar as blocked since we know it doesn't fit
+              // makes it easier to skip it later and avoid duplicated checks
+              tokenStateManager.getState(result.start, grammar.name).setBlocked();
+              logger.writeLine(`${grammar.name} at ${result.start}: now blocked..`);
+
+              logger.writeLine(`was incorrect: ${grammar.name} cause: ${cause}`);
             }
           });
 

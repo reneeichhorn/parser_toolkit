@@ -48,17 +48,18 @@ suite('Recursive Test Suite', () => {
                 return (t.name === 'eq' ||
                     t.name === 'and' ||
                     t.name === 'ident');
-            }
+            },
+            maxElements: 1,
         }).get();
 
         // create base grammars
         plugin.createGrammar({
             root: false,
-            name: 'eq',
-            grammar: `${EXPR} ${EQ} ${EXPR}`,
+            name: 'and',
+            grammar: `${EXPR} ${AND} ${EXPR}`,
             parsed(tokens, children) {
                 return {
-                    name: 'eq',
+                    name: 'and',
                     left: children[0].parse()[0],
                     right: children[1].parse()[0],
                 };
@@ -67,11 +68,11 @@ suite('Recursive Test Suite', () => {
 
         plugin.createGrammar({
             root: false,
-            name: 'and',
-            grammar: `${EXPR} ${AND} ${EXPR}`,
+            name: 'eq',
+            grammar: `${EXPR} ${EQ} ${EXPR}`,
             parsed(tokens, children) {
                 return {
-                    name: 'and',
+                    name: 'eq',
                     left: children[0].parse()[0],
                     right: children[1].parse()[0],
                 };
@@ -104,14 +105,6 @@ suite('Recursive Test Suite', () => {
 
     const expected = [
         ['if (abc)', { name: 'if', expr: { name: 'ident', value: 'abc' } }],
-        ['if (a == b)', {
-            name: 'if',
-            expr: {
-                name: 'eq',
-                left: { name: 'ident', value: 'a' },
-                right: { name: 'ident', value: 'b'},
-            }
-        }],
         ['if (a && b)', {
             name: 'if',
             expr: {
@@ -120,11 +113,19 @@ suite('Recursive Test Suite', () => {
                 right: { name: 'ident', value: 'b'},
             }
         }],
+        ['if (a == b)', {
+            name: 'if',
+            expr: {
+                name: 'eq',
+                left: { name: 'ident', value: 'a' },
+                right: { name: 'ident', value: 'b'},
+            }
+        }],
     ];
 
     expected.forEach(ex => {
         test(`should parse: '${ex[0]}'`, () => {
-            assert.deepEqual(parser.parse('\n\n' + ex[0] + '\n\n'), ex[1]);
+            assert.deepEqual(parser.parse('\n\n' + ex[0] + '\n\n')[0], ex[1]);
         });
     });
 

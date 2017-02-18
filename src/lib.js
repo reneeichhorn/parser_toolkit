@@ -54,11 +54,13 @@ class Library {
 
   parse(code) {
     const filtered = this.tokenize(code);
-    console.log(filtered);
+    this.logDebug(filtered);
 
     this.logDebug('generating ast! waiting..\n');
     let builder = grammarReg.createTokenBuilder(filtered, holders);
     let ruleTree = builder.build();
+    this.logDebug(builder.getLog());
+    //console.log(builder.getLog());
     this.logDebug(JSON.stringify(ruleTree, null, 2));
 
     this.logDebug('generate object tree! waiting..\n');
