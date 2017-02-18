@@ -49,6 +49,10 @@ suite('Recursive Test Suite', () => {
                     t.name === 'and' ||
                     t.name === 'ident');
             },
+            precedence: [
+                ['left', ['eq']],
+                ['left', ['and']],
+            ],
             maxElements: 1,
         }).get();
 
@@ -104,8 +108,9 @@ suite('Recursive Test Suite', () => {
     });
 
     const expected = [
-        ['if (abc)', { name: 'if', expr: { name: 'ident', value: 'abc' } }],
-        ['if (a && b)', {
+        // on level down checks
+        ['should parse', 'if (abc)', { name: 'if', expr: { name: 'ident', value: 'abc' } }],
+        ['should parse', 'if (a && b)', {
             name: 'if',
             expr: {
                 name: 'and',
@@ -113,7 +118,7 @@ suite('Recursive Test Suite', () => {
                 right: { name: 'ident', value: 'b'},
             }
         }],
-        ['if (a == b)', {
+        ['should parse', 'if (a == b)', {
             name: 'if',
             expr: {
                 name: 'eq',
@@ -121,11 +126,30 @@ suite('Recursive Test Suite', () => {
                 right: { name: 'ident', value: 'b'},
             }
         }],
+        ['should parse multi levels and apply precendence', 'if (a == b && c == d)', {
+            name: 'if',
+            expr: {
+                name: 'and',
+                left: {
+                    name: 'eq',
+                    left: { name: 'ident', value: 'a' },
+                    right: { name: 'ident', value: 'b'},
+                },
+                right: {
+                    name: 'eq',
+                    left: { name: 'ident', value: 'c' },
+                    right: { name: 'ident', value: 'd'},
+                },
+            },
+        }]
     ];
 
     expected.forEach(ex => {
-        test(`should parse: '${ex[0]}'`, () => {
-            assert.deepEqual(parser.parse('\n\n' + ex[0] + '\n\n')[0], ex[1]);
+        test(`${ex[0]}: '${ex[1]}'`, () => {
+            let t = parser.parse('\n\n' + ex[1] + '\n\n')[0];
+            console.log(JSON.stringify(t, null, '\t'));
+
+            assert.deepEqual(t, ex[2]);
         });
     });
 
