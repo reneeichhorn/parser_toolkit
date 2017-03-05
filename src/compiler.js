@@ -41,6 +41,7 @@ module.exports = () => {
           sub.push({
             name: childchildname,
             real: childchild.realname,
+            alias: childchild.alias,
 
             parse() {
               if (childchildname == 'holder') {
@@ -64,6 +65,13 @@ module.exports = () => {
             },
 
           });
+        });
+
+        // add alias to parser
+        sub.forEach(s => {
+          if (typeof s.alias !== 'undefined') {
+            sub[s.alias] = sub;
+          }
         });
 
         // generate code

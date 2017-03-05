@@ -217,13 +217,22 @@ module.exports = () => {
                   tokens[tokenPointer].alias = regex.exec(grammar.tokens[grammarTokenPointer])[0].substr(1);
                 }
               } else if (grammar.tokens[grammarTokenPointer].startsWith('-G')) {
-                //console.log('go deeper');
                 logger.nextLevel();
-                let grammarName = grammar.tokens[grammarTokenPointer].substr(2, grammar.tokens[grammarTokenPointer].length - 3);
+
+                // removes -G from the beginning, and cuts of :alias
+                let grammarName = grammar.tokens[grammarTokenPointer]
+                    .substr(2, grammar.tokens[grammarTokenPointer].length - 3)
+                    .replace(/:[a-zA-Z0-9]+/, '');
+
                 let found = this.findFitting(tokenPointer,
                   registryArr.filter(g => g.name.startsWith(grammarName)));
-                //console.log('go higher');
                 logger.previousLevel();
+
+                // if alias available save it for later
+                if (grammar.tokens[grammarTokenPointer].indexOf(':') !== -1) {
+                  let regex = /:[a-zA-Z]+/;
+                  found.alias = regex.exec(grammar.tokens[grammarTokenPointer])[0].substr(1);
+                }
 
                 if (typeof found.end !== 'undefined') {
                   tokenPointer = found.end - 1;
@@ -233,8 +242,10 @@ module.exports = () => {
                   cause = 'sub gramma not found, ' + JSON.stringify(found);
                 }
               } else if (grammar.tokens[grammarTokenPointer].startsWith('-H')) {
-                // parse out -H to get actual holder name
-                let realname = grammar.tokens[grammarTokenPointer].substr(2, grammar.tokens[grammarTokenPointer].length - 3);
+                // parse out -H  and :alias to get actual holder name
+                let realname = grammar.tokens[grammarTokenPointer]
+                    .substr(2, grammar.tokens[grammarTokenPointer].length - 3)
+                    .replace(/:[a-zA-Z0-9]+/, '');
 
                 // ask holder for a list of available grammars
                 let targetGrammars = treeArr.concat(registryArr).filter(holders[realname].filter);
@@ -254,6 +265,12 @@ module.exports = () => {
                   found.name = 'holder';
                   found.realname = realname;
                   found.precedence = holders[realname].precedence;
+
+                  // if alias available save it for later
+                  if (grammar.tokens[grammarTokenPointer].indexOf(':') !== -1) {
+                    let regex = /:[a-zA-Z]+/;
+                    found.alias = regex.exec(grammar.tokens[grammarTokenPointer])[0].substr(1);
+                  }
 
                   result.children.push(found);
                   tokenPointer = found.children[found.children.length - 1].end - 1;
