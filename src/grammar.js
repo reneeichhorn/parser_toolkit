@@ -221,8 +221,8 @@ module.exports = () => {
 
                 // removes -G from the beginning, and cuts of :alias
                 let grammarName = grammar.tokens[grammarTokenPointer]
-                    .substr(2, grammar.tokens[grammarTokenPointer].length - 3)
                     .replace(/:[a-zA-Z0-9]+/, '');
+                grammarName = grammarName.substr(2, grammarName.length - 3);
 
                 let found = this.findFitting(tokenPointer,
                   registryArr.filter(g => g.name.startsWith(grammarName)));
@@ -244,8 +244,8 @@ module.exports = () => {
               } else if (grammar.tokens[grammarTokenPointer].startsWith('-H')) {
                 // parse out -H  and :alias to get actual holder name
                 let realname = grammar.tokens[grammarTokenPointer]
-                    .substr(2, grammar.tokens[grammarTokenPointer].length - 3)
                     .replace(/:[a-zA-Z0-9]+/, '');
+                realname = realname.substr(2, realname.length - 3);
 
                 // ask holder for a list of available grammars
                 let targetGrammars = treeArr.concat(registryArr).filter(holders[realname].filter);

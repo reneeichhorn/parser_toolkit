@@ -31,7 +31,12 @@ class Library {
   }
 
   on(ev, cb) {
-    e.on(ev, cb);
+    e.addListener(ev, cb);
+    return {
+      removeListener() {
+        e.removeListener(ev, cb);
+      },
+    }
   }
 
   tokenize(code) {
@@ -61,7 +66,6 @@ class Library {
     let builder = grammarReg.createTokenBuilder(filtered, holders);
     let ruleTree = builder.build();
     this.logDebug(builder.getLog());
-    //console.log(builder.getLog());
     this.logDebug(JSON.stringify(ruleTree, null, 2));
 
     this.logDebug('generate object tree! waiting..\n');
