@@ -3,19 +3,19 @@
 const nextPowerOfTwo = x => Math.ceil(Math.log(x) / Math.log(2));
 
 const getGrammarPossibilities = grammar => {
-  const regex = /#_[a-zA-Z_\s\-]*_#/gi;
+  const regex = /#_[a-zA-Z0-9_\s\-]*(:[a-zA-Z0-9]+)?_#/gi;
   const optionals = [];
   const result = [];
 
   while (true) {
-    const r = regex.exec(grammar)
+    const r = regex.exec(grammar);
     if (r == null) {
       break;
     }
 
     optionals.push(r[0]);
   }
-  
+
   const bits = Math.pow(2, nextPowerOfTwo(optionals.length));
   const possibilities = Math.pow(2, bits);
 
