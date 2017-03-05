@@ -18,8 +18,6 @@ const holders = {};
 const e = new EventEmitter();
 
 class Library {
-  static Workflows = workflow;
-
   /*loadFromString(s) {
     const s = new stream.Readable();
     s._read = function noop() {}; // redundant? see update below
@@ -187,5 +185,7 @@ class Library {
     return plugin;
   };
 };
+
+Library.Workflows = workflow;
 
 module.exports = Library;
