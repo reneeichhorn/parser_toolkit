@@ -253,6 +253,7 @@ module.exports = () => {
                 if (found.children.length > 0) {
                   found.name = 'holder';
                   found.realname = realname;
+                  found.precedence = holders[realname].precedence;
 
                   result.children.push(found);
                   tokenPointer = found.children[found.children.length - 1].end - 1;

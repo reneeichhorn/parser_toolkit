@@ -147,8 +147,6 @@ suite('Recursive Test Suite', () => {
     expected.forEach(ex => {
         test(`${ex[0]}: '${ex[1]}'`, () => {
             let t = parser.parse('\n\n' + ex[1] + '\n\n')[0];
-            console.log(JSON.stringify(t, null, '\t'));
-
             assert.deepEqual(t, ex[2]);
         });
     });
