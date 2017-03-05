@@ -8,6 +8,7 @@ const _ = require('lodash');
 const grammarReg = require('./grammar')();
 const tokenizer = require('./tokenizer')(grammarReg);
 const compiler = require('./compiler')();
+const workflow = require('./workflow');
 
 const grammars = {};
 const tokens = [];
@@ -17,6 +18,8 @@ const holders = {};
 const e = new EventEmitter();
 
 class Library {
+  static Workflows = workflow;
+
   /*loadFromString(s) {
     const s = new stream.Readable();
     s._read = function noop() {}; // redundant? see update below

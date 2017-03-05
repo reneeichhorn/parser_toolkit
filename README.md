@@ -26,6 +26,7 @@ Parser Toolkit simplyifies the parsing process by allowing you to define keyword
   * Human readable grammatic definition
   * Optionals
   * Lists with optionals seperator
+  * Precedence
 - Compiler / Transpiler
   * Recursively compiles all objects
 
