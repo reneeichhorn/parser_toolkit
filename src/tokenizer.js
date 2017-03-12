@@ -280,9 +280,6 @@ module.exports = (grammar) => {
                 foundTokens.push(newPossible[0]);
               }
             } else {
-              // found other tokens that could be possible
-              console.log('found multiple possible tokens', others);
-
               // check if others make sense
               let new_index = index + 1;
 

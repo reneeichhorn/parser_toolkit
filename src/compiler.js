@@ -25,6 +25,7 @@ module.exports = () => {
         const name = child.name.replace(/#[0-9]+/, '');
 
         // get tokens
+        console.log('22222', child);
         const tokens = programTokens.slice(child.start, child.end);
         tokens.forEach(token => {
           if (typeof token.alias !== 'undefined') {
