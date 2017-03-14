@@ -155,10 +155,12 @@ module.exports = () => {
          * Looks for the best fitting grammar
          */
         findFitting(tokenIndex, grammars) {
-          const result = {
+          let result = {
             start: tokenIndex,
             children: [],
           };
+
+          const potentialGrammars = [];
 
           grammars.map(grammar => {
             // if grammar is not good / therefore blocked or in processing we don't need to check it at this point.
@@ -188,6 +190,7 @@ module.exports = () => {
 
             let isCorrect = true;
             let cause = '';
+            let consumedTokens = 0;
 
             while (true) {
               if ((tokenPointer) >= tokens.length) {
@@ -205,6 +208,7 @@ module.exports = () => {
               }
 
               logger.writeLine(`${tokenPointer} '${tokens[tokenPointer].name}' '${grammar.tokens[grammarTokenPointer].replace(/:[a-zA-Z]+/, '')}'`);
+              consumedTokens++;
 
               if (grammar.tokens[grammarTokenPointer] == '-SELF-') {
                 let name = grammar.name.replace(/#[0-9]+/, '');
@@ -298,6 +302,16 @@ module.exports = () => {
 
               result.end = tokenPointer;
               result.name = grammar.name;
+              result.consumed = consumedTokens;
+
+              // grammar is correct so this could be used!
+              potentialGrammars.push(result);
+
+              // continue searching, there could be more/better fitting grammars
+              result = {
+                start: tokenIndex,
+                children: [],
+              };
             } else {
               result.children.pop();
 
@@ -310,7 +324,21 @@ module.exports = () => {
             }
           });
 
-          return result;
+          // choose longest grammar
+          let actualResult = {
+            start: tokenIndex,
+            consumed: -1,
+            children: [],
+          };
+          potentialGrammars.forEach(g => {
+            if (g.consumed > actualResult.consumed) {
+              actualResult = g;
+            } else if (g.consumed === actualResult.consumed) {
+              logger.writeLine(`warning: two conflicting grammars, choosing first!`);
+            }
+          });
+
+          return actualResult;
         },
 
       };
